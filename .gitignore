@@ -1,1 +1,5 @@
 venv/
+
+kafka/__pycache__
+
+credenciales.py
