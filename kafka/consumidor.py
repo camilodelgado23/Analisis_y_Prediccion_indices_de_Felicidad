@@ -3,7 +3,6 @@ import json
 import joblib
 import pandas as pd
 import os
-from sklearn.preprocessing import LabelEncoder
 from feature_selection import seleccionar_caracteristicas
 
 modelo = joblib.load('Model/random_forest_model.pkl')
@@ -15,13 +14,12 @@ conf = {
 }
 
 consumer = Consumer(conf)
-
 consumer.subscribe(['datos_entrada'])
 
 csv_path = 'predicciones_resultados.csv'
 if not os.path.isfile(csv_path):
     with open(csv_path, 'w') as file:
-        file.write("Country or region,Region,GDP per capita,Social support,Healthy life expectancy,Freedom to make life choices,Perceptions of corruption,Generosity,Dystopia_Residual,Prediccion\n")
+        file.write("Country or region,Region,GDP per capita,Social support,Healthy life expectancy,Freedom to make life choices,Perceptions of corruption,Generosity,Dystopia_Residual,Score,Prediccion\n")
 
 try:
     while True:
@@ -48,10 +46,14 @@ try:
             'Perceptions of corruption', 'Generosity', 'Dystopia_Residual'
         ])
 
-        prediccion = modelo.predict(df_selected)
+        df_selected['Score'] = data['Score']
+
+        df_input = df_selected.drop(columns=['Score'])  
+        prediccion = modelo.predict(df_input)
         print(f"Predicción: {prediccion[0]}")
 
-        df_selected['Prediccion'] = prediccion[0] 
-        df_selected.to_csv(csv_path, mode='a', header=False, index=False)  
+        df_selected['Prediccion'] = prediccion[0]
+
+        df_selected.to_csv(csv_path, mode='a', header=False, index=False)
 finally:
     consumer.close()

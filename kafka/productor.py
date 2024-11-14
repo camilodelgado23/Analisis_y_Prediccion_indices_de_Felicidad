@@ -14,7 +14,7 @@ df = pd.read_csv('Data\\datos_felicidad_total.csv')
 
 columnas_modelo = ['Country or region', 'Region', 'GDP per capita', 'Social support', 
                    'Healthy life expectancy', 'Freedom to make life choices', 
-                   'Perceptions of corruption', 'Generosity', 'Dystopia_Residual']
+                   'Perceptions of corruption', 'Generosity', 'Dystopia_Residual', 'Score']
 
 df_selected = df[columnas_modelo]
 
