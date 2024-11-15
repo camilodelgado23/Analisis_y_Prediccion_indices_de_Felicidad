@@ -1,9 +1,17 @@
+import sys
+import os
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from socket import create_connection
 from confluent_kafka import Consumer
 import json
 import joblib
 import pandas as pd
-import os
+import mysql.connector
 from feature_selection import seleccionar_caracteristicas
+from Database.conexion_db import create_connection
+
 
 modelo = joblib.load('Model/random_forest_model.pkl')
 
@@ -16,10 +24,28 @@ conf = {
 consumer = Consumer(conf)
 consumer.subscribe(['datos_entrada'])
 
-csv_path = 'predicciones_resultados.csv'
-if not os.path.isfile(csv_path):
-    with open(csv_path, 'w') as file:
-        file.write("Country or region,Region,GDP per capita,Social support,Healthy life expectancy,Freedom to make life choices,Perceptions of corruption,Generosity,Dystopia_Residual,Score,Prediccion\n")
+
+connection = create_connection()
+cursor = connection.cursor()
+
+tabla_sql = '''
+CREATE TABLE IF NOT EXISTS predicciones (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    country_or_region VARCHAR(255),
+    region VARCHAR(255),
+    gdp_per_capita FLOAT,
+    social_support FLOAT,
+    healthy_life_expectancy FLOAT,
+    freedom_to_make_life_choices FLOAT,
+    perceptions_of_corruption FLOAT,
+    generosity FLOAT,
+    dystopia_residual FLOAT,
+    score FLOAT,
+    prediccion FLOAT
+)
+'''
+cursor.execute(tabla_sql)
+connection.commit()
 
 try:
     while True:
@@ -48,12 +74,25 @@ try:
 
         df_selected['Score'] = data['Score']
 
-        df_input = df_selected.drop(columns=['Score'])  
+        df_input = df_selected.drop(columns=['Score']) 
         prediccion = modelo.predict(df_input)
         print(f"Predicción: {prediccion[0]}")
 
         df_selected['Prediccion'] = prediccion[0]
 
-        df_selected.to_csv(csv_path, mode='a', header=False, index=False)
+        insert_query = '''
+        INSERT INTO predicciones (
+            country_or_region, region, gdp_per_capita, social_support, 
+            healthy_life_expectancy, freedom_to_make_life_choices, 
+            perceptions_of_corruption, generosity, dystopia_residual, score, prediccion
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        '''
+        
+        row_values = tuple(df_selected.iloc[0].values)
+        cursor.execute(insert_query, row_values)
+        connection.commit()
+        
 finally:
     consumer.close()
+    cursor.close()
+    connection.close()
