@@ -13,7 +13,7 @@ from feature_selection import seleccionar_caracteristicas
 from Database.conexion_db import create_connection
 
 
-modelo = joblib.load('Model/random_forest_model.pkl')
+modelo = joblib.load('Model/random_forest_regressor.pkl')
 
 conf = {
     'bootstrap.servers': 'localhost:9092',
