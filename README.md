@@ -1,6 +1,6 @@
-# workshop3 :file_folder:
+# Analisis y Prediccion indices de Felicidad :file_folder:
 
-## Por: Camilo Jose Delgado Bolaños - 2225337 
+## Por: Camilo Jose Delgado Bolaños 
 
 En este workshop se recibieron 5 datasets que contienen informacion relacionadas con la felicidad o bienestar en varios países o regiones. a estos datos se les realizo un E.D.A para limpiar y analizar  su contenido y posterior uso para realizar un modelo de regrecion usando una división de datos del 70-30 (70% para entrenamiento - 30% para pruebas), se transmiten los datos transformados por medio de kafka, y se utiliza el modelo para predecir el índice de felicidad, luego se Almacenaron en una base de datos las predicciones con los respectivos insumos. 
 
